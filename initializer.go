@@ -8,8 +8,8 @@ var (
 
 func init() {
 	EventBus = &EventFactory{
-		Mu:             &sync.Mutex{},
-		Wg:             &sync.WaitGroup{},
+		mu:             &sync.Mutex{},
+		wg:             &sync.WaitGroup{},
 		eventGroup:     []*Event{},
 		registeredFunc: make(map[*Event][]EventHandler),
 	}
@@ -17,8 +17,8 @@ func init() {
 
 func NewEventBus() *EventFactory {
 	return &EventFactory{
-		Mu:             &sync.Mutex{},
-		Wg:             &sync.WaitGroup{},
+		mu:             &sync.Mutex{},
+		wg:             &sync.WaitGroup{},
 		eventGroup:     []*Event{},
 		registeredFunc: make(map[*Event][]EventHandler),
 	}
