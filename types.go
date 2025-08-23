@@ -13,8 +13,8 @@ type EventData struct {
 type EventHandler func(event *EventData, args ...string)
 
 type EventFactory struct {
-	Mu             *sync.Mutex
-	Wg             *sync.WaitGroup
+	mu             *sync.Mutex
+	wg             *sync.WaitGroup
 	eventGroup     []*Event
 	registeredFunc map[*Event][]EventHandler
 }

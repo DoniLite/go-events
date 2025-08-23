@@ -3,8 +3,8 @@ package goevents
 import "reflect"
 
 func (bus *EventFactory) CreateEvent(eventName string) *Event {
-	bus.Mu.Lock()
-	defer bus.Mu.Unlock()
+	bus.mu.Lock()
+	defer bus.mu.Unlock()
 
 	newEvent := &Event{Name: eventName}
 	for _, ev := range bus.eventGroup {
@@ -17,8 +17,8 @@ func (bus *EventFactory) CreateEvent(eventName string) *Event {
 }
 
 func (bus *EventFactory) On(event *Event, handler EventHandler) {
-	bus.Mu.Lock()
-	defer bus.Mu.Unlock()
+	bus.mu.Lock()
+	defer bus.mu.Unlock()
 
 	handlers := bus.registeredFunc[event]
 	for _, fn := range handlers {
@@ -30,8 +30,8 @@ func (bus *EventFactory) On(event *Event, handler EventHandler) {
 }
 
 func (bus *EventFactory) Off(event *Event, handler EventHandler) {
-	bus.Mu.Lock()
-	defer bus.Mu.Unlock()
+	bus.mu.Lock()
+	defer bus.mu.Unlock()
 
 	handlers := bus.registeredFunc[event]
 	filtered := make([]EventHandler, 0)
@@ -50,19 +50,19 @@ func (bus *EventFactory) Off(event *Event, handler EventHandler) {
 }
 
 func (bus *EventFactory) Emit(event *Event, data *EventData, args ...string) {
-	bus.Mu.Lock()
+	bus.mu.Lock()
 	handlers := bus.registeredFunc[event]
-	bus.Mu.Unlock()
+	bus.mu.Unlock()
 
 	for _, handler := range handlers {
-		bus.Wg.Add(1)
+		bus.wg.Add(1)
 		go func(fn EventHandler) {
-			defer bus.Wg.Done()
+			defer bus.wg.Done()
 			fn(data, args...)
 		}(handler)
 	}
 }
 
 func (bus *EventFactory) Wait() {
-	bus.Wg.Wait()
+	bus.wg.Wait()
 }
