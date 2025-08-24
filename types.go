@@ -8,6 +8,7 @@ type Event struct {
 
 type EventData struct {
 	Message string
+	Payload any
 }
 
 type EventHandler func(event *EventData, args ...string)
@@ -17,4 +18,9 @@ type EventFactory struct {
 	wg             *sync.WaitGroup
 	eventGroup     []*Event
 	registeredFunc map[*Event][]EventHandler
+}
+
+
+func DecodeDataPayload[T any](data *EventData) T {
+	return  data.Payload.(T)
 }
