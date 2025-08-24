@@ -26,6 +26,7 @@ type EventFactory struct {
 }
 
 // Decodes the payload of an EventData into the specified type
-func DecodeDataPayload[T any](data *EventData) T {
-	return data.Payload.(T)
+func DecodeDataPayload[T any](data *EventData) (T, bool) {
+	payload, ok := data.Payload.(T)
+	return payload, ok
 }

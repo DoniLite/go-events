@@ -64,7 +64,7 @@ func main() {
 - `Wait()`: Wait for all handlers to complete.
 - `Subscribe(fn EventHandler, targetEvents ...*Event)`: Subscribe an event handler for the target events if no targets is provided the handler is registered for all events
 - `NewEventBus() *EventFactory`: Create a new event bus instance.
-- `DecodeDataPayload[T any](data *EventData) T`: Decode an event data payload to the target type
+- `DecodeDataPayload[T any](data *EventData) (T, bool)`: Decode an event data payload to the target type
 
 ## Testing
 

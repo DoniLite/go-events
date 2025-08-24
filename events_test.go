@@ -181,7 +181,11 @@ func TestDecodeDataPayload_ShouldReturnCorrectType(t *testing.T) {
 	expected := "test"
 	data := &EventData{Payload: expected}
 
-	result := DecodeDataPayload[string](data)
+	result, ok := DecodeDataPayload[string](data)
+
+	if !ok {
+		t.Errorf("Failed to decode payload")
+	}
 
 	if result != expected {
 		t.Errorf("Expected '%s', got '%s'", expected, result)
