@@ -120,3 +120,74 @@ func TestEmit_ShouldBeAsynchronous(t *testing.T) {
 		t.Errorf("Emit took too long, expected async behavior")
 	}
 }
+
+func TestSubscribe_ShouldRegisterEventForEach(t *testing.T) {
+	eventNames := []string{"event:one", "event:two", "event:three"}
+	var events []*Event
+	bus := EventBus
+	called := 0
+
+	handler := func(data *EventData, args ...string) {
+		called++
+	}
+
+	for _, name := range eventNames {
+		event := bus.CreateEvent(name)
+		events = append(events, event)
+	}
+
+	bus.Subscribe(handler)
+
+	for _, event := range events {
+		bus.Emit(event, &EventData{})
+	}
+
+	bus.Wait()
+
+	if called != len(events) {
+		t.Errorf("Expected handler to be called %d times, got %d", len(events), called)
+	}
+}
+
+func TestSubscribe_ShouldRegisterEventForTargets(t *testing.T) {
+	eventNames := []string{"event:one", "event:two", "event:three"}
+	var events []*Event
+	bus := EventBus
+	called := 0
+
+	handler := func(data *EventData, args ...string) {
+		called++
+	}
+
+	for _, name := range eventNames {
+		event := bus.CreateEvent(name)
+		events = append(events, event)
+	}
+
+	bus.Subscribe(handler, events...)
+
+	for _, event := range events {
+		bus.Emit(event, &EventData{})
+	}
+
+	bus.Wait()
+
+	if called != len(events) {
+		t.Errorf("Expected handler to be called %d times, got %d", len(events), called)
+	}
+}
+
+func TestDecodeDataPayload_ShouldReturnCorrectType(t *testing.T) {
+	expected := "test"
+	data := &EventData{Payload: expected}
+
+	result, ok := DecodeDataPayload[string](data)
+
+	if !ok {
+		t.Errorf("Failed to decode payload")
+	}
+
+	if result != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, result)
+	}
+}

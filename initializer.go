@@ -15,6 +15,7 @@ func init() {
 	}
 }
 
+// Creates a new instance of EventFactory
 func NewEventBus() *EventFactory {
 	return &EventFactory{
 		mu:             &sync.Mutex{},

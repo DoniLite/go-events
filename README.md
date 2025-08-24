@@ -62,7 +62,9 @@ func main() {
 - `Off(event *Event, handler EventHandler)`: Remove a handler.
 - `Emit(event *Event, data *EventData, args ...string)`: Emit an event asynchronously.
 - `Wait()`: Wait for all handlers to complete.
+- `Subscribe(fn EventHandler, targetEvents ...*Event)`: Subscribe an event handler for the target events if no targets is provided the handler is registered for all events
 - `NewEventBus() *EventFactory`: Create a new event bus instance.
+- `DecodeDataPayload[T any](data *EventData) (T, bool)`: Decode an event data payload to the target type
 
 ## Testing
 

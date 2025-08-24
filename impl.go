@@ -2,6 +2,7 @@ package goevents
 
 import "reflect"
 
+// Create an event that can be fire with the event bus
 func (bus *EventFactory) CreateEvent(eventName string) *Event {
 	bus.mu.Lock()
 	defer bus.mu.Unlock()
@@ -16,19 +17,22 @@ func (bus *EventFactory) CreateEvent(eventName string) *Event {
 	return newEvent
 }
 
+// register an event to the event bus based on the provided event notice that the provided handler will not be replaced or register again
+// if it already exist if you want to replace any function use the replace method or unregistered the handler before
 func (bus *EventFactory) On(event *Event, handler EventHandler) {
 	bus.mu.Lock()
 	defer bus.mu.Unlock()
 
 	handlers := bus.registeredFunc[event]
 	for _, fn := range handlers {
-		if &fn == &handler {
+		if reflect.ValueOf(fn).Pointer() == reflect.ValueOf(handler).Pointer() {
 			return
 		}
 	}
 	bus.registeredFunc[event] = append(handlers, handler)
 }
 
+// Unregister an event handler
 func (bus *EventFactory) Off(event *Event, handler EventHandler) {
 	bus.mu.Lock()
 	defer bus.mu.Unlock()
@@ -49,6 +53,7 @@ func (bus *EventFactory) Off(event *Event, handler EventHandler) {
 	}
 }
 
+// Emit the provided event and call all the registered handler
 func (bus *EventFactory) Emit(event *Event, data *EventData, args ...string) {
 	bus.mu.Lock()
 	handlers := bus.registeredFunc[event]
@@ -63,6 +68,35 @@ func (bus *EventFactory) Emit(event *Event, data *EventData, args ...string) {
 	}
 }
 
+// Wait until all the registered handler func to be called an executed
+// Notice that this method is not async and calling the internal
+//
+//	WaitGroup.Wait()
+//
+// Avoid calling this function as possible due to the fact that all handler are called in goroutines
+// But this method can be helpful for testing purposes or if you want to get the result of the handlers
 func (bus *EventFactory) Wait() {
 	bus.wg.Wait()
+}
+
+// Subscribe a function to the event bus if you provide some events your handler will be called for all the events
+// But if no event list is provided the handler will be called for all the events
+func (bus *EventFactory) Subscribe(fn EventHandler, targetEvents ...*Event) {
+	bus.mu.Lock()
+	defer bus.mu.Unlock()
+
+	if len(targetEvents) == 0 {
+		for _, ev := range bus.eventGroup {
+			bus.registeredFunc[ev] = append(bus.registeredFunc[ev], fn)
+		}
+		return
+	}
+
+	for _, target := range bus.eventGroup {
+		for _, ev := range targetEvents {
+			if target.Name == ev.Name {
+				bus.registeredFunc[target] = append(bus.registeredFunc[target], fn)
+			}
+		}
+	}
 }
